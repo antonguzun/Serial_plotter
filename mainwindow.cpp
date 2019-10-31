@@ -160,7 +160,6 @@ void MainWindow::closeSerialPort()
 
 void MainWindow::about()
 {
-    updateChannels();
     QMessageBox::about(this, tr("About Simple Terminal"),
                        tr("The <b>Simple Terminal</b> example demonstrates how to "
                           "use the Qt Serial Port module in modern GUI applications "
@@ -220,7 +219,6 @@ void MainWindow::readData()
     mapped_data.append(chE);
     mapped_data.append(chF);
 
-    appendDataInFile(mapped_data);
 //    m_ui->customPlot->graph(0)->addData(timer, dataCh1);
 //    m_ui->customPlot->replot();
 
@@ -258,17 +256,24 @@ void MainWindow::readData()
     }
     m_ui->customPlot->rescaleAxes();
     m_ui->customPlot->replot();
+
+    appendDataInFile(mapped_data);
+    QString format = "hh:mm:ss.z";
+    qDebug() << "time: " << time.currentTime().toString(format);
 }
 //! [7]
 
 void MainWindow::appendDataInFile(const QVector<int> &data) {
-    QFile file("out.txt");
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        return;
-
-    QTextStream out(&file);
-    out << "The magic number is: " << 49 << "\n";
-
+    qDebug() << "append data: ";
+    QString filename = "Data.txt";
+    QFile file(filename);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
+        QTextStream out(&file);
+        out << "The magic number is: " << 55 << "\n";
+    }
+    qDebug() << "File is open" << file.isOpen();
+    file.close();
+    qDebug() << "File is open" << file.isOpen();
 }
 //! [8]
 void MainWindow::handleError(QSerialPort::SerialPortError error)
@@ -342,6 +347,5 @@ void MainWindow::setupGraph()
     m_ui->customPlot->xAxis->setTicker(timeTicker);
     m_ui->customPlot->axisRect()->setupFullAxesBox();
     m_ui->customPlot->yAxis->setRange(0, 300);
-    qDebug() << "timer" << timeTicker;
 
 }

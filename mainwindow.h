@@ -60,6 +60,8 @@
 QT_BEGIN_NAMESPACE
 
 class QLabel;
+class QCPDataMap;
+class QCPData;
 
 namespace Ui {
 class MainWindow;

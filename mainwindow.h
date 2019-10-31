@@ -96,7 +96,7 @@ private:
 
 private:
     void showStatusMessage(const QString &message);
-    void appendDataInFile(const QVector<int> &data);
+    void appendDataInFile(const QVector<QString> &data);
 
     Ui::MainWindow *m_ui = nullptr;
     QLabel *m_status = nullptr;

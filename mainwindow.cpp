@@ -61,6 +61,15 @@
 #include <QTimer>
 
 #define LENGHT 6700
+#define A_COLOR QColor(255, 0, 0, 127)
+#define B_COLOR QColor(0, 0, 255, 127)
+#define C_COLOR QColor(0, 255, 0, 127)
+#define D_COLOR QColor(255, 255, 0, 127)
+#define E_COLOR QColor(0, 255, 255, 127)
+#define F_COLOR QColor(255, 0, 255, 127)
+#define ROW_TIME_FORMAT "hh:mm:ss.z"
+#define FILENAME_TIME_FORMAT "YYYY/MM/DD hh:mm"
+
 /****************** ATTENTION    *******************/
 /*     ASCII FORM FOR UART "155 255 123 012\r\n"        */
 /*     HEX FORM FOR UART "'a'0xff0xff0xff0xff\n"        */
@@ -211,19 +220,13 @@ void MainWindow::readData()
     int chE = (int(data[17]) - 48) * 100 + (int(data[18]) - 48) * 10 + (int(data[19]) - 48);
     int chF = (int(data[21]) - 48) * 100 + (int(data[22]) - 48) * 10 + (int(data[23]) - 48);
 
-    QVector<int> mapped_data;
-    mapped_data.append(chA);
-    mapped_data.append(chB);
-    mapped_data.append(chC);
-    mapped_data.append(chD);
-    mapped_data.append(chE);
-    mapped_data.append(chF);
 
 //    m_ui->customPlot->graph(0)->addData(timer, dataCh1);
 //    m_ui->customPlot->replot();
 
     static QTime time(QTime::currentTime());
     // calculate two new data points:
+
     double key = time.elapsed()/1000.0; // time elapsed since start of demo, in seconds
     static double lastPointKey = 0;
     if (key-lastPointKey > 0.002) // at most add point every 2 ms
@@ -257,23 +260,41 @@ void MainWindow::readData()
     m_ui->customPlot->rescaleAxes();
     m_ui->customPlot->replot();
 
+    QVector<QString> mapped_data;
+    mapped_data.append(time.currentTime().toString(ROW_TIME_FORMAT));
+    mapped_data.append(QVariant(chA).toString());
+    mapped_data.append(QVariant(chB).toString());
+    mapped_data.append(QVariant(chC).toString());
+    mapped_data.append(QVariant(chD).toString());
+    mapped_data.append(QVariant(chE).toString());
+    mapped_data.append(QVariant(chF).toString());
     appendDataInFile(mapped_data);
-    QString format = "hh:mm:ss.z";
-    qDebug() << "time: " << time.currentTime().toString(format);
+    qDebug() << "time: " << time.currentTime().toString(ROW_TIME_FORMAT);
 }
 //! [7]
 
-void MainWindow::appendDataInFile(const QVector<int> &data) {
-    qDebug() << "append data: ";
-    QString filename = "Data.txt";
-    QFile file(filename);
+void MainWindow::appendDataInFile(const QVector<QString> &data) {
+    QString path("data/");
+    QDir dir; // Initialize to the desired dir if 'path' is relative
+              // By default the program's working directory "." is used.
+
+    // We create the directory if needed
+    if (!dir.exists(path))
+        dir.mkpath(path); // You can check the success if needed
+
+    //QString fileName = QString( "%1%2" ).arg("some_file_name").arg( ".dat" );
+    QString filename = "data.csv";
+
+    QFile file(path + filename);
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream out(&file);
-        out << "The magic number is: " << 55 << "\n";
+        foreach (auto i, data) {
+            out << i << ";";
+        }
+        out << "\n";
+
     }
-    qDebug() << "File is open" << file.isOpen();
     file.close();
-    qDebug() << "File is open" << file.isOpen();
 }
 //! [8]
 void MainWindow::handleError(QSerialPort::SerialPortError error)
@@ -301,6 +322,13 @@ void MainWindow::initActionsConnections()
     connect(m_ui->checkBoxChannelD, &QCheckBox::stateChanged, this, &MainWindow::updateChannels);
     connect(m_ui->checkBoxChannelE, &QCheckBox::stateChanged, this, &MainWindow::updateChannels);
     connect(m_ui->checkBoxChannelF, &QCheckBox::stateChanged, this, &MainWindow::updateChannels);
+    m_ui->checkBoxChannelA->setStyleSheet("QCheckBox { color: red }");
+    m_ui->checkBoxChannelB->setStyleSheet("QCheckBox { color: blue }");
+    m_ui->checkBoxChannelC->setStyleSheet("QCheckBox { color: green }");
+    m_ui->checkBoxChannelD->setStyleSheet("QCheckBox { color: yellow }");
+    m_ui->checkBoxChannelE->setStyleSheet("QCheckBox { color: cyan }");
+    m_ui->checkBoxChannelF->setStyleSheet("QCheckBox { color: violet }");
+
 }
 
 void MainWindow::showStatusMessage(const QString &message)
@@ -321,20 +349,20 @@ void MainWindow::updateChannels()
 
 void MainWindow::setupGraph()
 {
+    m_ui->customPlot->addGraph(); // red line
+    m_ui->customPlot->graph(0)->setPen(QPen(A_COLOR));
     m_ui->customPlot->addGraph(); // blue line
-    m_ui->customPlot->graph(0)->setPen(QPen(QColor(40, 110, 255)));
-    m_ui->customPlot->addGraph(); // red line
-    m_ui->customPlot->graph(1)->setPen(QPen(QColor(255, 110, 40)));
-    m_ui->customPlot->addGraph(); // red line
-    m_ui->customPlot->graph(2)->setPen(QPen(QColor(200, 110, 40)));
-    m_ui->customPlot->addGraph(); // red line
-    m_ui->customPlot->graph(3)->setPen(QPen(QColor(100, 110, 40)));
-    m_ui->customPlot->addGraph(); // red line
-    m_ui->customPlot->graph(4)->setPen(QPen(QColor(255, 110, 100)));
-    m_ui->customPlot->addGraph(); // red line
-    m_ui->customPlot->graph(5)->setPen(QPen(QColor(100, 110, 100)));
+    m_ui->customPlot->graph(1)->setPen(QPen(B_COLOR));
+    m_ui->customPlot->addGraph(); // green line
+    m_ui->customPlot->graph(2)->setPen(QPen(C_COLOR));
+    m_ui->customPlot->addGraph(); // yellow line
+    m_ui->customPlot->graph(3)->setPen(QPen(D_COLOR));
+    m_ui->customPlot->addGraph(); // tea line
+    m_ui->customPlot->graph(4)->setPen(QPen(E_COLOR));
+    m_ui->customPlot->addGraph(); // violet line
+    m_ui->customPlot->graph(5)->setPen(QPen(F_COLOR));
 
-    m_ui->customPlot->xAxis->setLabel("Время, сек");
+    m_ui->customPlot->xAxis->setLabel("Время, чч:мм:сс");
     m_ui->customPlot->yAxis->setLabel("Температура, \u2103");
     m_ui->customPlot->setInteraction(QCP::iRangeZoom,true);   // Включаем взаимодействие удаления/приближения
     m_ui->customPlot->setInteraction(QCP::iRangeDrag, true);  // Включаем взаимодействие перетаскивания графика

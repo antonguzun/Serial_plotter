@@ -3,3 +3,17 @@ Data.txt
 release/*
 data/data.csv
 Data.csv
+data/2019_10_31__19_40.csv
+Makefile.Debug
+Makefile.Release
+Makefile
+.qmake.stash
+Makefile.Debug
+Makefile.Release
+Makefile
+Makefile.Debug
+Makefile.Release
+Makefile
+release.zip
+*.Release
+*.Debug

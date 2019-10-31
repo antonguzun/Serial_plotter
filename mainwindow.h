@@ -105,6 +105,7 @@ private:
     QTimer *timer = new QTimer(this);
     SettingsDialog *m_settings = nullptr;
     QSerialPort *m_serial = nullptr;
+    QString *m_filename;
 };
 
 #endif // MAINWINDOW_H

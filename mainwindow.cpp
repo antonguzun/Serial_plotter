@@ -1,54 +1,3 @@
-/****************************************************************************
-**
-** Copyright (C) 2012 Denis Shienkov <denis.shienkov@gmail.com>
-** Copyright (C) 2012 Laszlo Papp <lpapp@kde.org>
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the QtSerialPort module of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "console.h"
@@ -67,12 +16,8 @@
 #define D_COLOR QColor(255, 255, 0, 127)
 #define E_COLOR QColor(0, 255, 255, 127)
 #define F_COLOR QColor(255, 0, 255, 127)
-#define ROW_TIME_FORMAT "hh:mm:ss.z"
-#define FILENAME_TIME_FORMAT "YYYY/MM/DD hh:mm"
-
-/****************** ATTENTION    *******************/
-/*     ASCII FORM FOR UART "155 255 123 012\r\n"        */
-/*     HEX FORM FOR UART "'a'0xff0xff0xff0xff\n"        */
+#define ROW_TIME_FORMAT "hh:mm:ss.zzz"
+#define FILENAME_TIME_FORMAT "yyyy_MM_dd__hh_mm"
 
 //! [0]
 MainWindow::MainWindow(QWidget *parent) :
@@ -82,7 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_console(new Console),
     m_settings(new SettingsDialog),
 //! [1]
-    m_serial(new QSerialPort(this))
+    m_serial(new QSerialPort(this)),
+    m_filename(new QString)
 //! [1]
 {
 //! [0]
@@ -96,6 +42,13 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->actionConfigure->setEnabled(true);
 
     m_ui->statusBar->addWidget(m_status);
+
+    static QDateTime file_name_time(QDateTime::currentDateTime());
+    QString part_name = file_name_time.currentDateTime().toString(FILENAME_TIME_FORMAT);
+    *m_filename = QString( "%1%2" ).arg(part_name).arg( ".csv" );
+
+    QVector<QString> header = {"Time", "Channel A", "Channel B", "Channel C", "Channel D", "Channel E", "Channel F"};
+    appendDataInFile(header);
 
     customPlot = new QCustomPlot();
     setupGraph();
@@ -275,16 +228,12 @@ void MainWindow::readData()
 
 void MainWindow::appendDataInFile(const QVector<QString> &data) {
     QString path("data/");
-    QDir dir; // Initialize to the desired dir if 'path' is relative
-              // By default the program's working directory "." is used.
-
-    // We create the directory if needed
+    QDir dir;
     if (!dir.exists(path))
-        dir.mkpath(path); // You can check the success if needed
+        dir.mkpath(path);
 
-    //QString fileName = QString( "%1%2" ).arg("some_file_name").arg( ".dat" );
-    QString filename = "data.csv";
-
+    QString filename = *m_filename;
+    qDebug() << "filename: " << filename;
     QFile file(path + filename);
     if (file.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream out(&file);

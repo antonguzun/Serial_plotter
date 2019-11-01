@@ -11,7 +11,11 @@ based on terminal Qt example
 ## Input data format
 
 Now hardcoded like "A012B312C213D241E001F\n", this is bad way, I know :) will be dynamicaly in the feature.
+
 Just send any 3 asc II numbers for each not used channels and hide them in the app, if you want to use less than 6 channels.
+
+## OS
+Tested for Windows 10 only
 
 ### TODO
 

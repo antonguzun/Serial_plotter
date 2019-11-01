@@ -10,7 +10,8 @@ based on terminal Qt example
 
 ### TODO
 
-- implement architecture for app
+- implement architecture for app, put in order this shit
+
 Add options for: 
 - choosing number of channels
 - choosing color for each channel, and other customize parameters for plot

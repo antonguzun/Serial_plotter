@@ -14,3 +14,4 @@ Add options for:
 - choosing color for each channel
 - choosing path for export data
 - plotting graph by early exported data
+- changing format for mapping data from serial port 
